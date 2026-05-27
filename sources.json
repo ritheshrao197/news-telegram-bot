@@ -1,0 +1,125 @@
+{
+  "rss_sources": {
+    "india_national": [
+      {
+        "name": "PIB India (Govt)",
+        "url": "https://pib.gov.in/Pressreleasesrss.aspx",
+        "category": "national",
+        "region": "all"
+      },
+      {
+        "name": "Rural Voice",
+        "url": "https://eng.ruralvoice.in/rss/latest-posts",
+        "category": "rural",
+        "region": "all"
+      },
+      {
+        "name": "Rural Voice - Ground Report",
+        "url": "https://eng.ruralvoice.in/rss/category/ground-report",
+        "category": "rural",
+        "region": "all"
+      },
+      {
+        "name": "Rural Voice - Rural Connect",
+        "url": "https://eng.ruralvoice.in/rss/category/rural-connect",
+        "category": "rural",
+        "region": "all"
+      }
+    ],
+    "district_news_sources": [
+      {
+        "name": "The Hindu - District News",
+        "url": "https://www.thehindu.com/news/national/feeder/default.rss",
+        "category": "district",
+        "region": "all",
+        "state": "all"
+      },
+      {
+        "name": "Times of India - City/District",
+        "url": "https://timesofindia.indiatimes.com/rssfeeds/2438028.cms",
+        "category": "district",
+        "region": "delhi"
+      },
+      {
+        "name": "Bangalore Mirror",
+        "url": "https://bangaloremirror.indiatimes.com/rssfeeds/20715157.cms",
+        "category": "district",
+        "region": "bangalore",
+        "state": "karnataka"
+      },
+      {
+        "name": "Mumbai Mirror",
+        "url": "https://mumbaimirror.indiatimes.com/rssfeeds/20714997.cms",
+        "category": "district",
+        "region": "mumbai",
+        "state": "maharashtra"
+      },
+      {
+        "name": "Chennai News",
+        "url": "https://timesofindia.indiatimes.com/rssfeeds/2438029.cms",
+        "category": "district",
+        "region": "chennai",
+        "state": "tamilnadu"
+      },
+      {
+        "name": "Kolkata News",
+        "url": "https://timesofindia.indiatimes.com/rssfeeds/2438030.cms",
+        "category": "district",
+        "region": "kolkata",
+        "state": "westbengal"
+      }
+    ],
+    "state_level": [
+      {
+        "name": "Hindustan Times - State News",
+        "url": "https://www.hindustantimes.com/rss/india/rssfeed.xml",
+        "category": "state",
+        "region": "all"
+      }
+    ],
+    "rural_development": [
+      {
+        "name": "Ministry of Rural Development",
+        "url": "https://rural.nic.in/rss.xml",
+        "category": "rural",
+        "region": "all"
+      },
+      {
+        "name": "Deendayal Antyodaya Yojana - NRLM",
+        "url": "https://aajeevika.gov.in/rss.xml",
+        "category": "rural",
+        "region": "all"
+      }
+    ]
+  },
+  "state_mapping": {
+    "andhra_pradesh": ["Visakhapatnam", "Vijayawada", "Tirupati", "Guntur"],
+    "karnataka": ["Bangalore", "Mysore", "Hubli", "Mangalore", "Belgaum"],
+    "maharashtra": ["Mumbai", "Pune", "Nagpur", "Nashik", "Aurangabad"],
+    "tamilnadu": [
+      "Chennai",
+      "Coimbatore",
+      "Madurai",
+      "Tiruchirappalli",
+      "Salem"
+    ],
+    "kerala": [
+      "Thiruvananthapuram",
+      "Kochi",
+      "Kozhikode",
+      "Kollam",
+      "Thrissur"
+    ],
+    "gujarat": ["Ahmedabad", "Surat", "Vadodara", "Rajkot", "Bhavnagar"],
+    "westbengal": ["Kolkata", "Howrah", "Durgapur", "Siliguri", "Asansol"],
+    "delhi": ["New Delhi", "Gurgaon", "Noida", "Faridabad"],
+    "uttar_pradesh": ["Lucknow", "Kanpur", "Agra", "Varanasi", "Prayagraj"],
+    "punjab": ["Ludhiana", "Amritsar", "Jalandhar", "Patiala"],
+    "rajasthan": ["Jaipur", "Jodhpur", "Udaipur", "Kota"],
+    "bihar": ["Patna", "Gaya", "Bhagalpur", "Muzaffarpur"],
+    "odisha": ["Bhubaneswar", "Cuttack", "Rourkela", "Puri"],
+    "telangana": ["Hyderabad", "Warangal", "Nizamabad"]
+  },
+  "district_wise_custom_sources": {},
+  "user_submitted_sources": []
+}
