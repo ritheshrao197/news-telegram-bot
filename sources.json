@@ -67,6 +67,27 @@
         "category": "district",
         "region": "kolkata",
         "state": "westbengal"
+      },
+      {
+        "name": "Prajavani - Karnataka Local News",
+        "url": "https://www.prajavani.net/rss.xml",
+        "category": "district",
+        "region": "all",
+        "state": "karnataka"
+      },
+      {
+        "name": "Vijaya Karnataka - District News",
+        "url": "https://vijayakarnataka.com/rssfeedsxml.cms",
+        "category": "district",
+        "region": "all",
+        "state": "karnataka"
+      },
+      {
+        "name": "Oneindia Kannada - Local",
+        "url": "https://kannada.oneindia.com/rss/kannada-news-fb.xml",
+        "category": "district",
+        "region": "all",
+        "state": "karnataka"
       }
     ],
     "state_level": [

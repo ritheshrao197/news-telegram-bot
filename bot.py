@@ -157,33 +157,205 @@ class NewsBot:
         query = update.callback_query
         await query.answer()
         
+        keyboard = [
+            [InlineKeyboardButton("💛❤️ Karnataka", callback_data='state_karnataka')],
+            [InlineKeyboardButton("🌍 Other State", callback_data='state_other')],
+            [InlineKeyboardButton("🏠 Main Menu", callback_data='main_menu')]
+        ]
+        
         await query.edit_message_text(
             "📍 *Set Your Location*\n\n"
-            "Send your district name to get local news.\n\n"
-            "Example: `Varanasi` or `Chennai`\n\n"
-            "Just type the district name and send it.",
-            parse_mode='Markdown'
+            "Please select your state from the options below:",
+            parse_mode='Markdown',
+            reply_markup=InlineKeyboardMarkup(keyboard)
         )
         
-        # Set a flag to expect location input
-        context.user_data['awaiting_location'] = True
+    async def show_karnataka_districts_p1(self, query):
+        keyboard = [
+            [InlineKeyboardButton("Bangalore Urban", callback_data='sel_dist_bangalore'),
+             InlineKeyboardButton("Bangalore Rural", callback_data='sel_dist_bangalore rural')],
+            [InlineKeyboardButton("Mysuru", callback_data='sel_dist_mysore'),
+             InlineKeyboardButton("Belagavi", callback_data='sel_dist_belgaum')],
+            [InlineKeyboardButton("Mangaluru", callback_data='sel_dist_mangalore'),
+             InlineKeyboardButton("Hubli-Dharwad", callback_data='sel_dist_dharwad')],
+            [InlineKeyboardButton("Shivamogga", callback_data='sel_dist_shimoga'),
+             InlineKeyboardButton("Hassan", callback_data='sel_dist_hassan')],
+            [InlineKeyboardButton("Mandya", callback_data='sel_dist_mandya'),
+             InlineKeyboardButton("Tumakuru", callback_data='sel_dist_tumkur')],
+            [InlineKeyboardButton("Udupi", callback_data='sel_dist_udupi'),
+             InlineKeyboardButton("Chikkamagaluru", callback_data='sel_dist_chikkamagaluru')],
+            [InlineKeyboardButton("➡️ Next Page", callback_data='dist_kar_page_2')],
+            [InlineKeyboardButton("⬅️ Back to States", callback_data='set_location')]
+        ]
+        await query.edit_message_text(
+            "📍 *Select Karnataka District (Page 1/2)*\n\nChoose your district:",
+            parse_mode='Markdown',
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+
+    async def show_karnataka_districts_p2(self, query):
+        keyboard = [
+            [InlineKeyboardButton("Bagalkote", callback_data='sel_dist_bagalkot'),
+             InlineKeyboardButton("Ballari", callback_data='sel_dist_bellary')],
+            [InlineKeyboardButton("Bidar", callback_data='sel_dist_bidar'),
+             InlineKeyboardButton("Chamarajanagar", callback_data='sel_dist_chamarajanagar')],
+            [InlineKeyboardButton("Chikkaballapur", callback_data='sel_dist_chikkaballapur'),
+             InlineKeyboardButton("Chitradurga", callback_data='sel_dist_chitradurga')],
+            [InlineKeyboardButton("Davanagere", callback_data='sel_dist_davanagere'),
+             InlineKeyboardButton("Gadag", callback_data='sel_dist_gadag')],
+            [InlineKeyboardButton("Haveri", callback_data='sel_dist_haveri'),
+             InlineKeyboardButton("Kalaburagi", callback_data='sel_dist_kalaburagi')],
+            [InlineKeyboardButton("Kodagu", callback_data='sel_dist_kodagu'),
+             InlineKeyboardButton("Kolar", callback_data='sel_dist_kolar')],
+            [InlineKeyboardButton("Koppal", callback_data='sel_dist_koppal'),
+             InlineKeyboardButton("Raichur", callback_data='sel_dist_raichur')],
+            [InlineKeyboardButton("Ramanagara", callback_data='sel_dist_ramanagara'),
+             InlineKeyboardButton("Yadgir", callback_data='sel_dist_yadgir')],
+            [InlineKeyboardButton("Vijayapura", callback_data='sel_dist_vijayapura'),
+             InlineKeyboardButton("Uttara Kannada", callback_data='sel_dist_uttara kannada')],
+            [InlineKeyboardButton("⬅️ Previous Page", callback_data='state_karnataka')]
+        ]
+        await query.edit_message_text(
+            "📍 *Select Karnataka District (Page 2/2)*\n\nChoose your district:",
+            parse_mode='Markdown',
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
     
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle user text messages (for location setting)"""
-        if context.user_data.get('awaiting_location'):
-            location = update.message.text.strip()
+        user_id = update.effective_user.id
+        
+        if context.user_data.get('awaiting_other_location'):
+            text = update.message.text.strip()
+            parts = [p.strip() for p in text.split(',')]
             
-            # Save user preference
-            self.db.save_user_preference(update.effective_user.id, district=location)
+            state = parts[0]
+            district = parts[1] if len(parts) > 1 else None
+            
+            self.db.save_user_preference(user_id, state=state, district=district)
+            
+            context.user_data['awaiting_other_location'] = False
+            context.user_data['awaiting_taluk'] = True
+            
+            keyboard = [[InlineKeyboardButton("⏭️ Skip & Finish", callback_data='finish_location')]]
+            
+            await update.message.reply_text(
+                f"✅ *Location saved!*\nState: *{state.title()}*\nDistrict: *{district.title() if district else 'None'}*\n\n"
+                f"To refine your rural local news, please type your **Taluk** or **Village** name (e.g. your village/hobli name) and send it now, or click **Skip**:",
+                parse_mode='Markdown',
+                reply_markup=InlineKeyboardMarkup(keyboard)
+            )
+            
+        elif context.user_data.get('awaiting_taluk'):
+            taluk = update.message.text.strip()
+            pref = self.db.get_user_preference(user_id)
+            
+            self.db.save_user_preference(
+                user_id,
+                state=pref.get('state'),
+                district=pref.get('district'),
+                taluk=taluk
+            )
+            
+            context.user_data['awaiting_taluk'] = False
+            
+            await update.message.reply_text(
+                f"✅ *Taluk/Village saved:* {taluk.title()}\n\n"
+                f"All set! Click /start and select 'Local News' to get hyper-local news from your area!"
+            )
+            
+        elif context.user_data.get('awaiting_location'):
+            location = update.message.text.strip()
+            self.db.save_user_preference(user_id, district=location)
+            context.user_data['awaiting_location'] = False
             
             await update.message.reply_text(
                 f"✅ Location saved: {location.title()}\n\n"
                 f"Now use /start and select 'Local News' to get news from your area!"
             )
-            
-            context.user_data['awaiting_location'] = False
         else:
             await update.message.reply_text("Use /start to see available commands")
+
+    async def get_local_news(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        query = update.callback_query
+        await query.answer()
+        
+        user_id = update.effective_user.id
+        pref = self.db.get_user_preference(user_id)
+        
+        district = pref.get('district')
+        state = pref.get('state')
+        taluk = pref.get('taluk')
+        
+        if not district and not state:
+            keyboard = [[InlineKeyboardButton("📍 Set My Location", callback_data='set_location')],
+                        [InlineKeyboardButton("🏠 Main Menu", callback_data='main_menu')]]
+            await query.edit_message_text(
+                "📍 *No Location Set!*\n\n"
+                "Please configure your location first to get hyper-local district, taluk, and village news.",
+                parse_mode='Markdown',
+                reply_markup=InlineKeyboardMarkup(keyboard)
+            )
+            return
+            
+        await query.edit_message_text(
+            f"📡 *Scanning database for hyper-local news...*\n"
+            f"📍 Location: {taluk.title() + ', ' if taluk else ''}{district.title() if district else ''}{' (' + state.title() + ')' if state else ''}\n\n"
+            f"_Running semantic keyword extraction... Please wait._",
+            parse_mode='Markdown'
+        )
+        
+        articles = self.db.get_local_news_by_location(
+            district=district,
+            state=state,
+            taluk=taluk,
+            village=taluk,
+            limit=10
+        )
+        
+        if not articles:
+            # Fallback to broader state/national news
+            articles = self.db.get_news_by_category('india', limit=8)
+            if not articles:
+                await query.message.reply_text("No local news is currently available. We are updating databases now. Please try again soon!")
+                return
+            await query.message.reply_text(
+                f"ℹ️ _No custom taluk/village news found matching your specific keywords in the last 72 hours, but here is some regional/national news:_ \n"
+            )
+            
+        # Store articles in context.user_data for detailed summary lookup
+        context.user_data['articles'] = {}
+        
+        for idx, article in enumerate(articles[:8], 1):
+            message = f"""
+*{idx}. {article['title']}*
+
+📌 *Source:* {article['source']}
+📂 *Category:* {article.get('category', 'Local').title()}
+📝 *Summary:* {article['description'][:150]}...
+
+🔗 [Read full article]({article['url']})
+            """
+            
+            context.user_data['articles'][idx] = article
+            
+            keyboard = [[InlineKeyboardButton("📖 Read More", callback_data=f'detail_{idx}')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            await query.message.reply_text(
+                message,
+                parse_mode='Markdown',
+                reply_markup=reply_markup,
+                disable_web_page_preview=True
+            )
+            
+        # Update view count
+        for article in articles[:8]:
+            self.db.increment_views(article['url'])
+            
+        nav_keyboard = [[InlineKeyboardButton("🔄 Refresh Local News", callback_data='local')],
+                        [InlineKeyboardButton("🏠 Main Menu", callback_data='main_menu')]]
+        await query.message.reply_text("✅ That's all!", reply_markup=InlineKeyboardMarkup(nav_keyboard))
     
     async def button_callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         query = update.callback_query
@@ -198,13 +370,52 @@ class NewsBot:
             await self.get_stats(update, context)
         elif query.data == 'set_location':
             await self.set_location(update, context)
+        elif query.data == 'local':
+            await self.get_local_news(update, context)
+        elif query.data == 'state_karnataka':
+            await query.answer()
+            await self.show_karnataka_districts_p1(query)
+        elif query.data == 'dist_kar_page_2':
+            await query.answer()
+            await self.show_karnataka_districts_p2(query)
+        elif query.data == 'state_other':
+            await query.answer()
+            context.user_data['awaiting_other_location'] = True
+            await query.edit_message_text(
+                "📍 *Set Other Location*\n\n"
+                "Please type your State and District name separated by a comma.\n\n"
+                "Example: `Maharashtra, Pune` or `Kerala, Kochi`",
+                parse_mode='Markdown'
+            )
+        elif query.data.startswith('sel_dist_'):
+            await query.answer()
+            district_name = query.data.replace('sel_dist_', '')
+            user_id = update.effective_user.id
+            
+            # Save state as Karnataka, and the district
+            self.db.save_user_preference(user_id, state='karnataka', district=district_name)
+            
+            context.user_data['awaiting_taluk'] = True
+            
+            keyboard = [[InlineKeyboardButton("⏭️ Skip & Finish", callback_data='finish_location')]]
+            await query.edit_message_text(
+                f"✅ *District set to {district_name.title()}!*\n\n"
+                f"To refine your local news further, would you like to add a specific **Taluk** or **Village**? (e.g. `Hunsur` or `Srirangapatna` or `Mandya Village`)\n\n"
+                f"_Send your Taluk/Village name as a message now, or click **Skip & Finish** below:_ ",
+                parse_mode='Markdown',
+                reply_markup=InlineKeyboardMarkup(keyboard)
+            )
+        elif query.data == 'finish_location':
+            await query.answer("Location preference saved successfully!")
+            context.user_data['awaiting_taluk'] = False
+            context.user_data['awaiting_other_location'] = False
+            await self.start_command(update, context)
         elif query.data.startswith('detail_'):
             await query.answer()
             idx = int(query.data.replace('detail_', ''))
             article = context.user_data.get('articles', {}).get(idx)
             
             if article:
-                # Let user know we are generating it
                 loading_msg = await query.message.reply_text(
                     f"📡 *Generating comprehensive summary for:*\n_{article['title']}_\n\n"
                     f"_Fetching full article body and running semantic summarizer... Please wait._",
@@ -229,7 +440,6 @@ class NewsBot:
                 keyboard = [[InlineKeyboardButton("🏠 Main Menu", callback_data='main_menu')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 
-                # Delete the loading message
                 try:
                     await context.bot.delete_message(chat_id=update.effective_chat.id, message_id=loading_msg.message_id)
                 except Exception:

@@ -205,6 +205,66 @@ class DatabaseManager:
         
         return articles
     
+    def get_local_news_by_location(self, district: str = None, state: str = None, taluk: str = None, village: str = None, limit: int = 10, hours: int = 72) -> List[Dict]:
+        """Get hyper-local news matching district, taluk, village name either by column or keyword match"""
+        conn = sqlite3.connect(self.db_file)
+        cursor = conn.cursor()
+        
+        # Look back up to 72 hours for local news to ensure there's always something to show
+        cutoff_time = (datetime.now() - timedelta(hours=hours)).isoformat()
+        
+        query = '''
+            SELECT title, description, url, source, published_at, category, region, state, district, taluk
+            FROM news_articles
+            WHERE fetched_at >= ? AND (1=0
+        '''
+        params = [cutoff_time]
+        
+        if state:
+            query += " OR state = ? OR title LIKE ? OR description LIKE ?"
+            params.extend([state, f"%{state}%", f"%{state}%"])
+        if district:
+            query += " OR district = ? OR region = ? OR title LIKE ? OR description LIKE ?"
+            params.extend([district, district, f"%{district}%", f"%{district}%"])
+        if taluk:
+            query += " OR taluk = ? OR title LIKE ? OR description LIKE ?"
+            params.extend([taluk, f"%{taluk}%", f"%{taluk}%"])
+        if village:
+            query += " OR title LIKE ? OR description LIKE ?"
+            params.extend([f"%{village}%", f"%{village}%"])
+            
+        query += '''
+            )
+            ORDER BY published_at DESC, fetched_at DESC
+            LIMIT ?
+        '''
+        params.append(limit)
+        
+        try:
+            cursor.execute(query, params)
+            rows = cursor.fetchall()
+        except Exception as e:
+            logger.error(f"Error querying local news: {e}")
+            rows = []
+        finally:
+            conn.close()
+            
+        articles = []
+        for row in rows:
+            articles.append({
+                'title': row[0],
+                'description': row[1],
+                'url': row[2],
+                'source': row[3],
+                'published_at': row[4],
+                'category': row[5],
+                'region': row[6],
+                'state': row[7],
+                'district': row[8],
+                'taluk': row[9]
+            })
+        return articles
+    
     def get_latest_news(self, limit: int = 20, hours: int = 24) -> List[Dict]:
         """Get latest news from all categories"""
         conn = sqlite3.connect(self.db_file)
